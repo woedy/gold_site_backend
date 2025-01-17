@@ -6,54 +6,24 @@ from django.db import models
 
 
 
-class Asset(models.Model):
-    ASSET_TYPES = [
-        ('gold', 'Gold'),
-        ('silver', 'Silver'),
-        ('platinum', 'Platinum'),
-        ('palladium', 'Palladium'),
-        ('bitcoin', 'Bitcoin'),
-        ('other', 'Other'),
-    ]
-    
-    name = models.CharField(max_length=50)
-    type = models.CharField(max_length=20, choices=ASSET_TYPES)
-    symbol = models.CharField(max_length=10)
-    description = models.TextField(null=True, blank=True)
-    
-    def __str__(self):
-        return self.name
-    
-
-
-
 class Portfolio(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now_add=True)
+    title = models.CharField(max_length=255)  # The title of the portfolio
+    image = models.URLField()  # URL to the image for the portfolio
     
     def __str__(self):
-        return f"{self.user.username}'s Portfolio"
-    
+        return self.title
 
 
-
-
-
-
-class PortfolioItem(models.Model):
-    portfolio = models.ForeignKey(Portfolio, on_delete=models.CASCADE, related_name='items')
-    asset = models.ForeignKey(Asset, on_delete=models.CASCADE)
-    quantity = models.DecimalField(max_digits=18, decimal_places=8)  # for precision, especially for Bitcoin
-    average_purchase_price = models.DecimalField(max_digits=18, decimal_places=8)  # The average price at which it was purchased
+class Content(models.Model):
+    portfolio = models.ForeignKey(Portfolio, related_name='content', on_delete=models.CASCADE)
+    type = models.CharField(max_length=255)  # Type of the asset (Bitcoin, Gold Coins, etc.)
+    value = models.CharField(max_length=255)  # Value of the asset (e.g., $28,000)
+    quantity = models.IntegerField()  # Quantity of the asset
+    total = models.CharField(max_length=255)  # Total value (e.g., $3,452)
+    image = models.URLField()  # URL to the image for the content
     
     def __str__(self):
-        return f"{self.asset.name} - {self.quantity} units"
-
-    @property
-    def current_value(self):
-        # This would need to get the current price of the asset (implement that logic)
-        current_price = self.asset.latest_price()
-        return current_price * self.quantity
+        return f"{self.type} ({self.portfolio.title})"
 
 
 
@@ -67,7 +37,6 @@ class Transaction(models.Model):
     ]
     
     portfolio = models.ForeignKey(Portfolio, on_delete=models.CASCADE)
-    asset = models.ForeignKey(Asset, on_delete=models.CASCADE)
     transaction_type = models.CharField(max_length=4, choices=TRANSACTION_TYPES)
     quantity = models.DecimalField(max_digits=18, decimal_places=8)
     price_per_unit = models.DecimalField(max_digits=18, decimal_places=8)
@@ -79,7 +48,7 @@ class Transaction(models.Model):
 
 
 class PriceHistory(models.Model):
-    asset = models.ForeignKey(Asset, on_delete=models.CASCADE)
+#    asset = models.ForeignKey(Asset, on_delete=models.CASCADE)
     price = models.DecimalField(max_digits=18, decimal_places=8)  # Price of the asset at that time
     timestamp = models.DateTimeField(auto_now_add=True)
     

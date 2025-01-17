@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
+from datetime import timedelta
 import os
 from pathlib import Path
 
@@ -31,30 +32,36 @@ ALLOWED_HOSTS = ["*"]
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_HOST_USER = 'etornamasamoah@gmail.com'
-EMAIL_HOST_PASSWORD = 'vhixgmqnlwkbsgzv'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-DEFAULT_FROM_EMAIL = 'SwapWing <samahatbarter@gmail.com>'
+EMAIL_HOST_PASSWORD = 'nygmdsnhaxxlrsem'
+#EMAIL_PORT = 587
+#EMAIL_USE_TLS = True
+EMAIL_PORT = 465
+EMAIL_USE_SSL = True
+DEFAULT_FROM_EMAIL = 'Gold Palace<goldpalace@gmail.com>'
 BASE_URL = '0.0.0.0:80'
 
 # Application definition
 
 INSTALLED_APPS = [
-            "daphne",
+    "daphne",
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-        'channels',
+    'channels',
 
-            'rest_framework',
+    'rest_framework',
     'rest_framework.authtoken',
 
-        'corsheaders',
+    'corsheaders',
 
     'accounts',
+    'dashboard',
+    'activities',
+    'bank_account',
+    'portfolio'
 ]
 
 AUTH_USER_MODEL = 'accounts.User'
@@ -68,7 +75,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 
-            'django.middleware.common.CommonMiddleware',
+    'django.middleware.common.CommonMiddleware',
     'corsheaders.middleware.CorsMiddleware',
 ]
 
@@ -207,22 +214,20 @@ CORS_ALLOW_CREDENTIALS = True
 
 
 
-#REST_FRAMEWORK = {
-#    'DEFAULT_AUTHENTICATION_CLASSES': (
-#        'rest_framework_simplejwt.authentication.JWTAuthentication',
-#        # Add other authentication classes as needed
-#    ),
-#}
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        # Add other authentication classes as needed
+    ),
+}
 
 
 
 
-#SIMPLE_JWT = {
-#    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
-#    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
-#}
-
-
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+}
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 

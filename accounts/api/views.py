@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model, authenticate
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.db.models import Q
 from django.template.loader import get_template
+from bank_account.models import BankAccount
 from rest_framework import status, generics
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
@@ -15,7 +16,7 @@ from rest_framework.views import APIView
 from accounts.api.custom_jwt import CustomTokenObtainPairSerializer, CustomJWTAuthentication
 from accounts.api.serializers import UserRegistrationSerializer, PasswordResetSerializer, ListAllUsersSerializer
 from activities.models import AllActivity
-from god_bless_pro.utils import generate_email_token
+from gold_site_pro.utils import generate_email_token
 User = get_user_model()
 
 
@@ -83,15 +84,15 @@ def register_user(request):
 
 
         # Generate token using the custom serializer
-        #serializer = CustomTokenObtainPairSerializer()
-        #_token = serializer.get_token(user)
+        serializer = CustomTokenObtainPairSerializer()
+        _token = serializer.get_token(user)
 #
-        #token = {
-        #    'refresh': str(_token),
-        #    'access': str(_token.access_token),
-        #}
+        token = {
+            'refresh': str(_token),
+            'access': str(_token.access_token),
+        }
 
-        token = Token.objects.get(user=user).key
+        #token = Token.objects.get(user=user).key
         data['token'] = token
 
 
@@ -131,6 +132,13 @@ def register_user(request):
             fail_silently=False,
         )
 
+
+        
+
+        new_bank_account = BankAccount.objects.create(
+            user=user
+        )
+        
         #
         new_activity = AllActivity.objects.create(
             user=user,
