@@ -61,7 +61,9 @@ INSTALLED_APPS = [
     'dashboard',
     'activities',
     'bank_account',
-    'portfolio'
+    'portfolio',
+    'claims',
+    'delivery',
 ]
 
 AUTH_USER_MODEL = 'accounts.User'

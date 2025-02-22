@@ -1,0 +1,72 @@
+version: "3.8"
+
+services:
+  # Redis
+  redis:
+    image: redis:alpine
+    container_name: gold_site_redis
+
+  # Database Postgres
+  db:
+    image: postgres
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=gold_site_postgres
+      - POSTGRES_USER=gold_site_postgres
+      - POSTGRES_PASSWORD=gold_site_postgres
+    container_name: gold_site_postgres_db
+
+  # Django Application
+  gold_site_app:
+    build:
+      context: .
+    volumes:
+      - .:/gold_site_django
+      - ./static_cdn:/var/lib/static_cdn
+    ports:
+      - 6262:6262
+    container_name: gold_site_app
+    command: python manage.py runserver 0.0.0.0:6262
+    depends_on:
+      - db
+
+  # React Application
+  gold_site_frontend:
+    build:
+      context: ../gold_site_frontend  # Adjust the path to your React app
+    ports:
+      - "7011:7011"  # Map to the host's port
+    environment:
+      - REACT_APP_API_URL=http://gold_site_app:6262  # API URL for Django service
+
+  # Celery Worker
+  celery:
+    restart: always
+    build:
+      context: .
+    command: celery -A gold_site_pro worker -l DEBUG
+    volumes:
+      - .:/gold_site_django
+    container_name: gold_site_celery
+    depends_on:
+      - db
+      - redis
+      - gold_site_app
+
+  # Celery Beat
+  celery-beat:
+    restart: always
+    build:
+      context: .
+    command: celery -A gold_site_pro beat -l DEBUG
+    volumes:
+      - .:/gold_site_django
+    container_name: gold_site_celery_beat
+    depends_on:
+      - db
+      - redis
+      - gold_site_app
+
+volumes:
+  static_cdn:

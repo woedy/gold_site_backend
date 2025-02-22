@@ -64,6 +64,24 @@ def unique_account_id_generator(instance):
 
 
 
+def unique_tracking_number_generator(instance):
+    """
+    This is for a tracking_number field
+    :param instance:
+    :return:
+    """
+    size = random.randint(5, 7)
+    tracking_number = "GP-" + random_string_generator(size=size, chars=string.ascii_uppercase + string.digits) + "-(G)"
+
+    Klass = instance.__class__
+    qs_exists = Klass.objects.filter(tracking_number=tracking_number).exists()
+    if qs_exists:
+        return None
+    return tracking_number
+
+
+
+
 
 def unique_transaction_id_generator(instance):
     """

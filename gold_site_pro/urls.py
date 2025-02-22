@@ -17,12 +17,21 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+
+from django.conf import settings
+from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/accounts/', include('accounts.api.urls', 'accounts_api')),
 
     path('api/dashboard/', include('dashboard.api.urls', 'dashboard_api')),
+    path('api/portfolio/', include('portfolio.api.urls', 'portfolio_api')),
+    path('api/claims/', include('claims.api.urls', 'claim_api')),
+    path('api/delivery/', include('delivery.api.urls', 'delivery_api')),
 
 
 
 ]
+if settings.DEBUG:
+    urlpatterns = urlpatterns + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    urlpatterns = urlpatterns + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

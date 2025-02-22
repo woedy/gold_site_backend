@@ -1,32 +1,68 @@
+from decimal import Decimal
 import os
 import random
+from django.contrib.auth import get_user_model
 
 from django.conf import settings
 from django.db import models
 
+User = get_user_model()
+
+
+PORTFOLIO_TITLES = [
+        ('Cryptocurrency', 'Cryptocurrency'),
+        ('Gold', 'Gold'),
+    ]
+
+
+PORTFOLIO_TYPES = [
+        ('Metal', 'Metal'),
+        ('Software', 'Software'),
+    ]
 
 
 class Portfolio(models.Model):
-    title = models.CharField(max_length=255)  # The title of the portfolio
-    image = models.URLField()  # URL to the image for the portfolio
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='clients')
+    title = models.CharField(max_length=255, choices=PORTFOLIO_TITLES)  # The title of the portfolio
+    type = models.CharField(max_length=255, choices=PORTFOLIO_TYPES)  # The title of the portfolio
+    image = models.ImageField(upload_to='portfolio/', null=True, blank=True)
     
     def __str__(self):
         return self.title
-
+    
+    def calculate_total(self):
+        # Calculate the total value of all associated content
+        total_value = Decimal('0.00')
+        for content in self.contents.all():
+            total_value += content.calculate_total()
+        return total_value
 
 class Content(models.Model):
-    portfolio = models.ForeignKey(Portfolio, related_name='content', on_delete=models.CASCADE)
+    portfolio = models.ForeignKey(Portfolio, related_name='contents', on_delete=models.CASCADE)
     type = models.CharField(max_length=255)  # Type of the asset (Bitcoin, Gold Coins, etc.)
     value = models.CharField(max_length=255)  # Value of the asset (e.g., $28,000)
-    quantity = models.IntegerField()  # Quantity of the asset
-    total = models.CharField(max_length=255)  # Total value (e.g., $3,452)
-    image = models.URLField()  # URL to the image for the content
+    quantity = models.IntegerField(null=True, blank=True)  # Quantity of the asset
+    total = models.CharField(max_length=255, null=True, blank=True)  # Total value (e.g., $3,452)
+    image = models.ImageField(upload_to='contents/', null=True, blank=True)
     
     def __str__(self):
         return f"{self.type} ({self.portfolio.title})"
+    
 
+    def calculate_total(self):
+        # Convert value to a decimal and calculate the total for this content
+        try:
+            value = Decimal(self.value.replace('$', '').replace(',', ''))
+            total_value = value * self.quantity
+            return total_value
+        except Exception as e:
+            print(f"Error calculating total for content: {e}")
+            return Decimal('0.00')
 
-
+    def save(self, *args, **kwargs):
+        # Automatically calculate and update the `total` field before saving
+        self.total = str(self.calculate_total())
+        super().save(*args, **kwargs)
 
 
 

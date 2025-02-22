@@ -6,6 +6,7 @@ from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.db.models import Q
 from django.template.loader import get_template
 from bank_account.models import BankAccount
+from claims.models import Claim
 from rest_framework import status, generics
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
@@ -137,6 +138,10 @@ def register_user(request):
 
         new_bank_account = BankAccount.objects.create(
             user=user
+        )
+
+        claim = Claim.objects.create(
+            client=user
         )
         
         #
@@ -447,17 +452,18 @@ class UserLogin(APIView):
             return Response(payload, status=status.HTTP_400_BAD_REQUEST)
 
 
-        # Generate token using the custom serializer
-        #serializer = CustomTokenObtainPairSerializer()
-        #_token = serializer.get_token(user)
-#
-        #token = {
-        #    'refresh': str(_token),
-        #    'access': str(_token.access_token),
-        #}
+         #Generate token using the custom serializer
+        serializer = CustomTokenObtainPairSerializer()
+        _token = serializer.get_token(user)
 
-        token = Token.objects.get(user=user).key
+        token = {
+            'refresh': str(_token),
+            'access': str(_token.access_token),
+        }
+
+        #token = Token.objects.get(user=user).key
         data['token'] = token
+
 
 
 
